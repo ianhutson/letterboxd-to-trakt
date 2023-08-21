@@ -1,0 +1,17 @@
+{
+  "name": "letterboxd-to-trakt",
+  "version": "1.0.0",
+  "description": "letterboxd to trakt app",
+  "main": "",
+  "scripts": {
+    "go": "node --experimental-modules run.mjs"
+  },
+  "author": "ian",
+  "license": "ISC",
+  "devDependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^2.6.13",
+    "wdio": "^6.0.1"
+  }
+}
