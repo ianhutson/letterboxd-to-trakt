@@ -1,0 +1,8 @@
+steps:
+  - name: 'node:14'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm install
+        node --experimental-modules run.mjs
