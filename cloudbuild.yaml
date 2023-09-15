@@ -5,4 +5,7 @@ steps:
       - '-c'
       - |
         npm install
+        echo 'env variables:'
+        echo $TRAKTCLIENTID
+        echo TRAKTCLIENTSECRET
         node --experimental-modules run.mjs
