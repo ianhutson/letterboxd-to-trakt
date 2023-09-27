@@ -19,4 +19,5 @@ steps:
 
 options:
   logging: 'CLOUD_LOGGING_ONLY'  # or 'NONE' if you don't want to store logs in Cloud Storage
-  defaultLogsBucketBehavior: 'REGIONAL_USER_OWNED_BUCKET'
+  serviceAccount: 'watchlist-updater@letterboxd-to-trakt-396616.iam.gserviceaccount.com'
+  logsBucket: 'letterboxd-to-trakt'
