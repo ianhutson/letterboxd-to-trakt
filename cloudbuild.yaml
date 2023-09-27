@@ -19,5 +19,7 @@ steps:
 
 options:
   logging: 'CLOUD_LOGGING_ONLY'  # or 'NONE' if you don't want to store logs in Cloud Storage
-  serviceAccount: 'watchlist-updater@letterboxd-to-trakt-396616.iam.gserviceaccount.com'
-  logsBucket: 'letterboxd-to-trakt'
+  
+build:
+  serviceAccount: 'your-service-account-email@your-project-id.iam.gserviceaccount.com'
+  logsBucket: 'your-custom-logs-bucket-name'
