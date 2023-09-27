@@ -17,7 +17,6 @@ pool:
 jobs:
 - job: letterboxd-to-trakt
   displayName: Sync Lists
-  concurrency: 1   # Ensure that the job runs sequentially
   steps:
     - script: |
         npm install
