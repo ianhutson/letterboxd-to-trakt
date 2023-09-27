@@ -1,6 +1,22 @@
 trigger:
 - none
 
+parameters:
+  - name: TRAKTCLIENTID
+    displayName: TRAKTCLIENTID
+    default: ''
+    type: string
+    
+  - name: TRAKTCLIENTSECRET
+    displayName: TRAKTCLIENTSECRET
+    default: ''
+    type: string
+
+  - name: TMDBAPIKEY
+    displayName: TMDBAPIKEY
+    default: ''
+    type: string
+
 schedules:
 - cron: "0 */12 * * *"
   displayName: "Every 12 hours"
