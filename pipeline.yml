@@ -1,12 +1,12 @@
 trigger:
 - none
 
-parameters:
+variables:
   - name: TRAKTCLIENTID
     displayName: TRAKTCLIENTID
     default: ''
     type: string
-    
+
   - name: TRAKTCLIENTSECRET
     displayName: TRAKTCLIENTSECRET
     default: ''
