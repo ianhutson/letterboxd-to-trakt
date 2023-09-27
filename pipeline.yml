@@ -1,11 +1,12 @@
-steps:
-  - name: 'node:14'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        npm install
-        node --experimental-modules run.mjs
-        
-schedule:
-  cron: '0 */12 * * *'
+stages:
+  - build
+
+job:
+  stage: build
+  script:
+    - npm install
+    - node --experimental-modules run.mjs
+  only:
+    - schedules
+  variables:
+    SCHEDULE: "0 */12 * * *"
