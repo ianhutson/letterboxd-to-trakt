@@ -15,7 +15,7 @@ pool:
   vmImage: "ubuntu-latest"
 
 jobs:
-- job: 'letterboxd to trakt'
+- job: 'sync'
   displayName: Sync Lists
   steps:
     - script: |
