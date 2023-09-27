@@ -1,37 +1,26 @@
 trigger:
-- none
+  - none
 
 variables:
-  - name: TRAKTCLIENTID
-    displayName: TRAKTCLIENTID
-    default: ''
-    type: string
-
-  - name: TRAKTCLIENTSECRET
-    displayName: TRAKTCLIENTSECRET
-    default: ''
-    type: string
-
-  - name: TMDBAPIKEY
-    displayName: TMDBAPIKEY
-    default: ''
-    type: string
+  TRAKTCLIENTID: ""
+  TRAKTCLIENTSECRET: ""
+  TMDBAPIKEY: ""
 
 schedules:
-- cron: "0 */12 * * *"
-  displayName: "Every 12 hours"
-  branches:
-    include:
-    - '*'
+  - cron: "0 */12 * * *"
+    displayName: "Every 12 hours"
+    branches:
+      include:
+        - "*"
 
 pr:
-- '*'
+  - "*"
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: "windows-latest"
 
 steps:
-- script: |
-    npm install
-    node --experimental-modules run.mjs
-  displayName: 'Run Script'
+  - script: |
+      npm install
+      node --experimental-modules run.mjs
+    displayName: "Run Script"
