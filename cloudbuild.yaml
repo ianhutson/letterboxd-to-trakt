@@ -16,3 +16,6 @@ steps:
       - |
         npm install
         node --experimental-modules run.mjs
+
+options:
+  logging: 'NONE' 
