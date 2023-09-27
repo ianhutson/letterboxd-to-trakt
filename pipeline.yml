@@ -1,11 +1,6 @@
 trigger:
   - none
 
-variables:
-  TRAKTCLIENTID: ""
-  TRAKTCLIENTSECRET: ""
-  TMDBAPIKEY: ""
-
 schedules:
   - cron: "0 */12 * * *"
     displayName: "Every 12 hours"
