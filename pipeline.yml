@@ -1,5 +1,4 @@
-trigger:
-  - none
+trigger: none
 
 schedules:
   - cron: "0 */12 * * *"
@@ -8,15 +7,11 @@ schedules:
       include:
         - "*"
 
-pr:
-  - "*"
-
-pool:
-  vmImage: "ubuntu-latest"
-
 jobs:
-- job: 'sync'
+- job: sync
   displayName: Sync Lists
+  pool:
+    vmImage: "ubuntu-latest"
   steps:
     - script: |
         npm install
