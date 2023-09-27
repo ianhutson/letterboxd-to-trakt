@@ -1,4 +1,14 @@
 steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        SECRETS=("TRAKTCLIENTID" "TRAKTCLIENTSECRET" "TMDBAPIKEY")
+        for secret in "${SECRETS[@]}"; do
+          export "${secret}"=$(gcloud secrets versions access latest --secret="${secret}" --project="letterboxd-to-trakt-396616 " --format="get(payload.data)" | base64 -d)
+        done
+
   - name: 'node:14'
     entrypoint: 'bash'
     args:
