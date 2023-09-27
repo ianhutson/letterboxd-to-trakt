@@ -1,12 +1,21 @@
-stages:
-  - build
+trigger:
+- none
 
-job:
-  stage: build
-  script:
-    - npm install
-    - node --experimental-modules run.mjs
-  only:
-    - schedules
-  variables:
-    SCHEDULE: "0 */12 * * *"
+schedules:
+- cron: "0 */12 * * *"
+  displayName: "Every 12 hours"
+  branches:
+    include:
+    - '*'
+
+pr:
+- '*'
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- script: |
+    npm install
+    node --experimental-modules run.mjs
+  displayName: 'Run Script'
