@@ -3,9 +3,9 @@ import cheerio from "cheerio";
 import dotenv from "dotenv";
 dotenv.config();
 
-const traktClientId = process.env.TRAKTCLIENTID;
-const traktClientSecret = process.env.TRAKTCLIENTSECRET
-const tmdbApiKey = process.env.TMDBAPIKEY;
+const traktClientId='41e1a069daf841074b6882d5309abe9d4240f985e869b9868d6208a1458ccbe7'
+const traktClientSecret='03595e062ef4ac5ffacf26289833e04d1872e11767e5523bce68f13954e64455'
+const tmdbApiKey='d5c35f3fd323dd8e6adb15e933d862c9'
 
 const fetchWatchlistPage = async (page) => {
   try {
