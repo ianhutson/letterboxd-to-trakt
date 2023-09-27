@@ -16,3 +16,11 @@ steps:
       - |
         npm install
         node --experimental-modules run.mjs
+
+options:
+  logging: 'CLOUD_LOGGING_ONLY'  # or 'NONE' if you don't want to store logs in Cloud Storage
+
+# Use the REGIONAL_USER_OWNED_BUCKET option for logs
+build:
+  options:
+    defaultLogsBucketBehavior: 'REGIONAL_USER_OWNED_BUCKET'
