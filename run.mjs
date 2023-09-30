@@ -140,7 +140,7 @@ const getTraktApiAccessToken = async () => {
 
 const addToTrakt = async (movieTitles) => {
   const traktAccessToken = await getTraktApiAccessToken();
-  const traktApiUrl = "https://api.trakt.tv/sync/collection";
+  const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
     "Content-Type": "application/json",
     "trakt-api-version": "2",
