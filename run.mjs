@@ -3,9 +3,9 @@ import cheerio from "cheerio";
 import dotenv from "dotenv";
 dotenv.config();
 
-const traktClientId='41e1a069daf841074b6882d5309abe9d4240f985e869b9868d6208a1458ccbe7'
-const traktClientSecret='03595e062ef4ac5ffacf26289833e04d1872e11767e5523bce68f13954e64455'
-const tmdbApiKey='d5c35f3fd323dd8e6adb15e933d862c9'
+const traktClientId = process.env.TRAKTCLIENTID;
+const traktClientSecret = process.env.TRAKTCLIENTSECRET;
+const tmdbApiKey = process.env.TMDBAPIKEY;
 
 const fetchWatchlistPage = async (page) => {
   try {
@@ -97,31 +97,31 @@ const fetchTraktMovieDetails = async (movieTitle) => {
         },
       };
     }
-    return null; 
+    return null;
   } catch (error) {
     console.error("Error fetching movie details from Trakt:", error);
     retryCount++;
     if (retryCount < maxRetries) {
       console.log(`Retrying request (Attempt ${retryCount + 1})...`);
-      return fetchTraktMovieDetails(movieTitle); 
+      return fetchTraktMovieDetails(movieTitle);
     }
-    throw error; 
+    throw error;
   }
 };
 
 const getTraktApiAccessToken = async () => {
-  const tokenUrl = 'https://api.trakt.tv/oauth/token';
+  const tokenUrl = "https://api.trakt.tv/oauth/token";
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
   const body = JSON.stringify({
     client_id: traktClientId,
     client_secret: traktClientSecret,
-    grant_type: 'client_credentials',
+    grant_type: "client_credentials",
   });
   try {
     const response = await fetch(tokenUrl, {
-      method: 'POST',
+      method: "POST",
       headers: headers,
       body: body,
     });
@@ -130,10 +130,10 @@ const getTraktApiAccessToken = async () => {
       const accessToken = data.access_token;
       return accessToken;
     } else {
-      throw new Error('Failed to obtain access token');
+      throw new Error("Failed to obtain access token");
     }
   } catch (error) {
-    console.error('Error getting access token:', error);
+    console.error("Error getting access token:", error);
     throw error;
   }
 };
