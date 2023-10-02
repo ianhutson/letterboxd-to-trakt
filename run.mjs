@@ -5,6 +5,7 @@ dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
+const traktAccessToken = process.env.TRAKTACCESSTOKEN;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 
 const fetchWatchlistPage = async (page) => {
@@ -100,46 +101,22 @@ const fetchTraktMovieDetails = async (movieTitle) => {
     return null;
   } catch (error) {
     console.error("Error fetching movie details from Trakt:", error);
-    retryCount++;
-    if (retryCount < maxRetries) {
+    let retryCount = 0;
+    if (10 > retryCount) {
       console.log(`Retrying request (Attempt ${retryCount + 1})...`);
+      retryCount++;
+      setTimeout(() => {
+        console.log("After pause");
+      }, 1000);
       return fetchTraktMovieDetails(movieTitle);
     }
     throw error;
   }
 };
 
-const getTraktApiAccessToken = async () => {
-  const tokenUrl = "https://api.trakt.tv/oauth/token";
-  const headers = {
-    "Content-Type": "application/json",
-  };
-  const body = JSON.stringify({
-    client_id: traktClientId,
-    client_secret: traktClientSecret,
-    grant_type: "client_credentials",
-  });
-  try {
-    const response = await fetch(tokenUrl, {
-      method: "POST",
-      headers: headers,
-      body: body,
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const accessToken = data.access_token;
-      return accessToken;
-    } else {
-      throw new Error("Failed to obtain access token");
-    }
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    throw error;
-  }
-};
+
 
 const addToTrakt = async (movieTitles) => {
-  const traktAccessToken = await getTraktApiAccessToken();
   const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
     "Content-Type": "application/json",
@@ -164,7 +141,6 @@ const addToTrakt = async (movieTitles) => {
       });
     }
   }
-  console.log(movies);
   const requestBody = {
     movies: movies,
   };
@@ -186,4 +162,34 @@ async function exportToTrakt() {
   }
 }
 
+// const getTraktApiAccessToken = async () => {
+//   const tokenUrl = "https://api.trakt.tv/oauth/token";
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+//   const body = JSON.stringify({
+//     code: '',
+//     client_id: traktClientId,
+//     client_secret: traktClientSecret,
+//     grant_type: "authorization_code",
+//     redirect_uri: "https://google.com"
+//   });
+
+//   const response = await fetch(tokenUrl, {
+//     method: "POST",
+//     headers: headers,
+//     body: body,
+//   });
+//   if (response.ok) {
+//     const data = await response.json();
+//     const accessToken = data.access_token;
+//     console.log("accessToken: " + accessToken);
+//     return accessToken;
+//   } else {
+//     console.log(response)
+//     throw new Error("Failed to obtain access token");
+//   }
+// };
+
 exportToTrakt();
+// getTraktApiAccessToken();
