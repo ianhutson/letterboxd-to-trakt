@@ -1,12 +1,11 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 import dotenv from "dotenv";
-import fs from "fs";
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
-const traktAccessToken = process.env.TRAKTACCESSTOKEN;
+const oldAccessToken = process.env.TRAKTACCESSTOKEN;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 
 const fetchWatchlistPage = async (page) => {
@@ -115,23 +114,12 @@ const fetchTraktMovieDetails = async (movieTitle) => {
   }
 };
 
-async function saveKeyToFile(key) {
-  const content = `${key}\n`;
-  try {
-    await fs.writeFileSync("access-token.txt", content, "utf-8");
-    console.log(`Key '${key}' has been saved to access-token.txt`);
-  } catch (error) {
-    console.error(`Error saving key to file: ${error.message}`);
-  }
-}
-
 const addToTrakt = async (movieTitles) => {
   const newTraktToken = await getAccessToken(
-    traktAccessToken,
+    oldAccessToken,
     traktClientId,
     traktClientSecret
   );
-  await saveKeyToFile(newTraktToken);
   const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
     "Content-Type": "application/json",
@@ -183,9 +171,8 @@ async function exportToTrakt() {
   }
 }
 
-async function getAccessToken(refreshToken, clientId, clientSecret) {
+async function getAccessToken(clientId, clientSecret) {
   const traktApiUrl = "https://api.trakt.tv/oauth/token";
-
   try {
     const response = await fetch(traktApiUrl, {
       method: "POST",
@@ -193,25 +180,50 @@ async function getAccessToken(refreshToken, clientId, clientSecret) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refresh_token: refreshToken,
+        refresh_token: oldAccessToken,
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: "refresh_token",
       }),
     });
-
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-
     const responseData = await response.json();
-    const accessToken = responseData.access_token;
-
-    console.log("Access Token:", accessToken);
-    return accessToken;
+    const newAccessToken = responseData.access_token;
+    await updateVariableGroupVariable(newAccessToken)
+    console.log("New Access Token:", newAccessToken);
+    return newAccessToken;
   } catch (error) {
     console.error("Error getting access token:", error.message);
     throw error;
+  }
+}
+
+async function updateVariableGroupVariable(variableValue) {
+  const organization = 'yanhutson';
+  const project = 'letterdboxd-to-trakt';
+  const variableGroupId = '1';
+  const personalAccessToken = process.env.AZUREACCESSTOKEN;
+  const variableName = 'TRAKTACCESSTOKEN';
+  const url = `https://dev.azure.com/${organization}/${project}/_apis/distributedtask/variablegroups/${variableGroupId}?api-version=6.0-preview.2`;
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Basic ${Buffer.from(`:${personalAccessToken}`).toString('base64')}`
+  };
+  const response = await fetch(url, { method: 'GET', headers });
+  const responseData = await response.json();
+  const variableIndex = responseData.variables.findIndex(variable => variable.name === variableName);
+  if (variableIndex !== -1) {
+    responseData.variables[variableIndex].value = variableValue;
+    await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(responseData),
+    });
+    console.log(`Variable '${variableName}' updated successfully.`);
+  } else {
+    console.error(`Variable '${variableName}' not found in the variable group.`);
   }
 }
 

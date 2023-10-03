@@ -15,37 +15,7 @@ jobs:
 
     steps:
       - script: |
-          ls $(System.DefaultWorkingDirectory)
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          artifactName: 'access-token'
-          path: '$(Pipeline.Workspace)/downloaded-artifacts'
-          runVersion: 'latest'
-          continueOnError: true
-
-      - script: |
-          TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/downloaded-artifacts/access-token/access-token.txt)
-          echo "My variable value is: $TRAKTACCESSTOKEN"
-        displayName: "Read Artifact and Set Variable"
-        continueOnError: true
-
-      - script: |
           npm install
           node --experimental-modules run.mjs
         displayName: "Run Script"
         continueOnError: true
-
-      - task: CopyFiles@2
-        displayName: 'Copy access-token.txt'
-        inputs:
-          SourceFolder: '$(Build.SourcesDirectory)'
-          Contents: 'access-token.txt'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Artifact'
-        inputs:
-          PathToPublish: '$(Build.ArtifactStagingDirectory)'
-          ArtifactName: 'access-token'
-        continueOnError: true
-
