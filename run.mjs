@@ -126,12 +126,11 @@ async function saveKeyToFile(key) {
 }
 
 const addToTrakt = async (movieTitles) => {
-  // const newTraktToken = await getAccessToken(
-  //   traktAccessToken,
-  //   traktClientId,
-  //   traktClientSecret
-  // );
-  const newTraktToken = '273c41f3148a45bbbc0a1e8f16f5aa55afbf75305504a3c141be8d8195751ee2'
+  const newTraktToken = await getAccessToken(
+    traktAccessToken,
+    traktClientId,
+    traktClientSecret
+  );
   await saveKeyToFile(newTraktToken);
   const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
