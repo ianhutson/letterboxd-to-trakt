@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - script: |
-          echo $(Pipeline.Workspace)
+          echo $(Build.SourcesDirectory)/bin
       - task: DownloadPipelineArtifact@2
         inputs:
           artifactName: 'access-token'
