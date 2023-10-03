@@ -33,13 +33,17 @@ jobs:
       #   displayName: "Run Script"
       #   continueOnError: true
 
-      - script: |
-          ls -l $(Build.SourcesDirectory)
-          
-      - task: PublishBuildArtifacts@1
+      - task: CopyFiles@2
+        displayName: 'Copy access-token.txt'
         inputs:
-          targetPath: '$(Build.SourcesDirectory)/access-token.txt'
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: 'access-token.txt'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-          artifactName: "access-token"
-        displayName: "Publish Artifact"
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact'
+        inputs:
+          PathToPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'access-token'
         continueOnError: true
+
