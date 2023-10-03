@@ -19,6 +19,7 @@ jobs:
           artifactName: 'accessToken.txt'
           path: '$(Pipeline.Workspace)/downloaded-artifacts'
           runVersion: 'latest'
+          continueOnError: true
 
       - script: |
           TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/accessToken.txt)
