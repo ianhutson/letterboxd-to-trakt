@@ -6,9 +6,9 @@ dotenv.config();
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
-const traktRefreshToken = process.env.TRAKTREFRESHTOKEN
-let newAccessToken
-let newRefreshToken
+const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
+let newAccessToken;
+let newRefreshToken;
 
 const fetchWatchlistPage = async (page) => {
   try {
@@ -170,7 +170,7 @@ const addToTrakt = async (movieTitles) => {
           moviesBatches.length
         } successfully added!`
       );
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 };
@@ -183,6 +183,9 @@ async function exportToTrakt() {
   } catch (error) {
     console.error("An error occurred:", error);
   }
+  console.log(`Old refresh token: ${traktRefreshToken}`);
+  console.log(`Current access token: ${newAccessToken}`);
+  console.log(`Current refresh token: ${newRefreshToken}`);
 }
 
 async function getAccessTokenWithRefresh() {
@@ -246,6 +249,3 @@ async function updateVariableGroupVariable(variableName, variableValue) {
 }
 
 exportToTrakt();
-console.log(`Old refresh token: ${traktRefreshToken}`)
-console.log(`Current access token: ${newAccessToken}`)
-console.log(`Current refresh token: ${newRefreshToken}`)
