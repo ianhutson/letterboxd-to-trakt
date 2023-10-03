@@ -156,14 +156,20 @@ const addToTrakt = async (movieTitles) => {
       });
     }
   }
-  const requestBody = {
-    movies: movies,
-  };
-  const response = await fetch(traktApiUrl, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(requestBody),
-  });
+  const moviesInChunks = [];
+  for (let i = 0; i < movies.length; i += 10) {
+    moviesInChunks.push(movies.slice(i, i + 10));
+  }
+  for (const moviesChunk of moviesInChunks) {
+    const requestBody = {
+      movies: moviesChunk,
+    };
+    await fetch(traktApiUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(requestBody),
+    });
+  }
   console.log(response);
 };
 
