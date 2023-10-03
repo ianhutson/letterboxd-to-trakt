@@ -14,6 +14,8 @@ jobs:
       vmImage: "ubuntu-latest"
 
     steps:
+      - script: |
+          echo $(Pipeline.Workspace)
       - task: DownloadPipelineArtifact@2
         inputs:
           artifactName: 'access-token'
@@ -22,7 +24,7 @@ jobs:
           continueOnError: true
 
       - script: |
-          echo $(Pipeline.Workspace)
+
           TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/downloaded-artifacts/access-token/access-token.txt)
           echo "My variable value is: $TRAKTACCESSTOKEN"
         displayName: "Read Artifact and Set Variable"
