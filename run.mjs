@@ -118,8 +118,8 @@ const fetchTraktMovieDetails = async (movieTitle) => {
 async function saveKeyToFile(key) {
   const content = `${key}\n`;
   try {
-    await fs.writeFileSync("accessToken.txt", content, "utf-8");
-    console.log(`Key '${key}' has been saved to accessToken.txt`);
+    await fs.writeFileSync("access-token.txt", content, "utf-8");
+    console.log(`Key '${key}' has been saved to access-token.txt`);
   } catch (error) {
     console.error(`Error saving key to file: ${error.message}`);
   }
