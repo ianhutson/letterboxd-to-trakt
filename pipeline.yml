@@ -34,7 +34,7 @@ jobs:
 
       - task: PublishBuildArtifacts@1
         inputs:
-          pathtoPublish: "$(Build.SourcesDirectory)/accessToken.txt"
+          pathtoPublish: "$(Build.BuildDirectory)/accessToken.txt"
           artifactName: "accessToken"
           publishLocation: "Container"
         displayName: "Publish Artifact"
