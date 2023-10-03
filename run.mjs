@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 import dotenv from "dotenv";
+import fs from "fs";
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
@@ -115,11 +116,7 @@ const fetchTraktMovieDetails = async (movieTitle) => {
 };
 
 const addToTrakt = async (movieTitles) => {
-  const newTraktToken = await getAccessToken(
-    oldAccessToken,
-    traktClientId,
-    traktClientSecret
-  );
+  const newTraktToken = await getAccessTokenWithRefresh();
   const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
     "Content-Type": "application/json",
@@ -152,13 +149,20 @@ const addToTrakt = async (movieTitles) => {
     const requestBody = {
       movies: moviesChunk,
     };
-    await fetch(traktApiUrl, {
+    const response = await fetch(traktApiUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
     });
+    if (!response.ok) {
+      console.log("Response:" + response);
+      throw new Error(
+        `Error adding movies with chunk ${
+          moviesInChunks.indexOf(moviesChunk) + 1
+        } out of ${moviesInChunks.length}! Status: ${response.status}`
+      );
+    }
   }
-  console.log(response);
 };
 
 async function exportToTrakt() {
@@ -171,7 +175,7 @@ async function exportToTrakt() {
   }
 }
 
-async function getAccessToken(clientId, clientSecret) {
+async function getAccessTokenWithRefresh() {
   const traktApiUrl = "https://api.trakt.tv/oauth/token";
   try {
     const response = await fetch(traktApiUrl, {
@@ -180,9 +184,10 @@ async function getAccessToken(clientId, clientSecret) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refresh_token: oldAccessToken,
-        client_id: clientId,
-        client_secret: clientSecret,
+        refresh_token: process.env.TRAKTREFRESHTOKEN,
+        client_id: traktClientId,
+        client_secret: traktClientSecret,
+        redirect_uri: "https://google.com",
         grant_type: "refresh_token",
       }),
     });
@@ -191,8 +196,12 @@ async function getAccessToken(clientId, clientSecret) {
     }
     const responseData = await response.json();
     const newAccessToken = responseData.access_token;
-    await updateVariableGroupVariable(newAccessToken)
+    const newRefreshToken = responseData.refresh_token;
+    await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
+    await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
+    await updateEnvFile(newRefreshToken, newAccessToken);
     console.log("New Access Token:", newAccessToken);
+    console.log("New Refresh Token:", newRefreshToken);
     return newAccessToken;
   } catch (error) {
     console.error("Error getting access token:", error.message);
@@ -200,31 +209,84 @@ async function getAccessToken(clientId, clientSecret) {
   }
 }
 
-async function updateVariableGroupVariable(variableValue) {
-  const organization = 'yanhutson';
-  const project = 'letterdboxd-to-trakt';
-  const variableGroupId = '1';
+async function updateVariableGroupVariable(variableName, variableValue) {
+  const organization = "yanhutson";
+  const project = "letterdboxd-to-trakt";
+  const variableGroupId = "1";
   const personalAccessToken = process.env.AZUREACCESSTOKEN;
-  const variableName = 'TRAKTACCESSTOKEN';
   const url = `https://dev.azure.com/${organization}/${project}/_apis/distributedtask/variablegroups/${variableGroupId}?api-version=6.0-preview.2`;
   const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Basic ${Buffer.from(`:${personalAccessToken}`).toString('base64')}`
+    "Content-Type": "application/json",
+    Authorization: `Basic ${Buffer.from(`:${personalAccessToken}`).toString(
+      "base64"
+    )}`,
   };
-  const response = await fetch(url, { method: 'GET', headers });
-  const responseData = await response.json();
-  const variableIndex = responseData.variables.findIndex(variable => variable.name === variableName);
-  if (variableIndex !== -1) {
-    responseData.variables[variableIndex].value = variableValue;
+  try {
+    const response = await fetch(url, { method: "GET", headers });
+    const responseData = await response.clone().json();
+    responseData.variables[variableName].value = variableValue;
     await fetch(url, {
-      method: 'PUT',
+      method: "PUT",
       headers,
       body: JSON.stringify(responseData),
     });
     console.log(`Variable '${variableName}' updated successfully.`);
-  } else {
-    console.error(`Variable '${variableName}' not found in the variable group.`);
+  } catch (error) {
+    console.error("Error:", error.message);
   }
 }
 
+async function updateEnvFile(traktRefreshToken, traktAccessToken) {
+  const envFilePath = ".env";
+  try {
+    let envContent = await fs.readFileSync(envFilePath, "utf-8");
+    envContent = envContent.replace(
+      /TRAKTREFRESHTOKEN=.*$/,
+      `TRAKTREFRESHTOKEN=${traktRefreshToken}`
+    );
+    envContent = envContent.replace(
+      /TRAKTACCESSTOKEN=.*$/,
+      `TRAKTACCESSTOKEN=${traktAccessToken}`
+    );
+    await fs.writeFileSync(envFilePath, envContent, "utf-8");
+    console.log("Values updated in .env file.");
+  } catch (error) {
+    console.error("Error updating .env file:", error.message);
+  }
+}
+
+async function getAccessToken() {
+  const traktApiUrl = "https://api.trakt.tv/oauth/token";
+  try {
+    const response = await fetch(traktApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: "79c680c0dcd70ee903eb56aca22c1e9c23b520e729505c2b3221f22f6989b2d7",
+        client_id: traktClientId,
+        client_secret: traktClientSecret,
+        redirect_uri: "https://google.com",
+        grant_type: "authorization_code",
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const responseData = await response.json();
+    const accessToken = responseData.access_token;
+    const refreshToken = responseData.refresh_token;
+    await updateVariableGroupVariable("TRAKTACCESSTOKEN", accessToken);
+    await updateVariableGroupVariable("TRAKTREFRESHTOKEN", refreshToken);
+    console.log("New Access Token:", accessToken);
+    console.log("New Refresh Token:", refreshToken);
+    return accessToken;
+  } catch (error) {
+    console.error("Error getting access token:", error.message);
+    throw error;
+  }
+}
+
+// getAccessToken();
 exportToTrakt();
