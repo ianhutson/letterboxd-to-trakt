@@ -6,6 +6,7 @@ dotenv.config();
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
+const traktRefreshToken = process.env.TRAKTREFRESHTOKEN
 let newAccessToken
 let newRefreshToken
 
@@ -193,7 +194,7 @@ async function getAccessTokenWithRefresh() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refresh_token: process.env.TRAKTREFRESHTOKEN,
+        refresh_token: traktRefreshToken,
         client_id: traktClientId,
         client_secret: traktClientSecret,
         redirect_uri: "https://google.com",
@@ -245,5 +246,6 @@ async function updateVariableGroupVariable(variableName, variableValue) {
 }
 
 exportToTrakt();
+console.log(`Old refresh token: ${traktRefreshToken}`)
 console.log(`Current access token: ${newAccessToken}`)
 console.log(`Current refresh token: ${newRefreshToken}`)
