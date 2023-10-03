@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - script: |
-          ls $(Build.ArtifactStagingDirectory)
+          ls $(System.DefaultWorkingDirectory)
       - task: DownloadPipelineArtifact@2
         inputs:
           artifactName: 'access-token'
