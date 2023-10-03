@@ -16,12 +16,12 @@ jobs:
     steps:
       - task: DownloadPipelineArtifact@2
         inputs:
-          artifactName: 'accessToken'
+          artifactName: 'accessToken.txt'
           path: '$(Pipeline.Workspace)/downloaded-artifacts'
           runVersion: 'latest'
 
       - script: |
-          TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/downloaded-artifacts/accessToken.txt)
+          TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/accessToken.txt)
           echo "My variable value is: $TRAKTACCESSTOKEN"
         displayName: "Read Artifact and Set Variable"
         continueOnError: true
