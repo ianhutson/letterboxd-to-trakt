@@ -7,6 +7,9 @@ schedules:
       include:
         - "*"
 
+variables:
+  - group: ApiKeys
+
 jobs:
   - job: sync
     displayName: Sync Lists
