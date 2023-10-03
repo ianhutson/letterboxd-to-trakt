@@ -6,6 +6,8 @@ dotenv.config();
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
+let newAccessToken
+let newRefreshToken
 
 const fetchWatchlistPage = async (page) => {
   try {
@@ -139,13 +141,15 @@ const addToTrakt = async (movieTitles) => {
       });
     }
   }
-  const moviesInChunks = [];
+  const moviesBatches = [];
   for (let i = 0; i < movies.length; i += 10) {
-    moviesInChunks.push(movies.slice(i, i + 10));
+    moviesBatches.push(movies.slice(i, i + 10));
   }
-  for (const moviesChunk of moviesInChunks) {
+  for (const moviesBatch of moviesBatches) {
+    console.log("Attempting to add the following movies-");
+    console.log(moviesBatch);
     const requestBody = {
-      movies: moviesChunk,
+      movies: moviesBatch,
     };
     const response = await fetch(traktApiUrl, {
       method: "POST",
@@ -153,12 +157,19 @@ const addToTrakt = async (movieTitles) => {
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) {
-      console.log("Response:" + response);
+      console.log("Response:" + (await response.text()));
       throw new Error(
-        `Error adding movies with chunk ${
-          moviesInChunks.indexOf(moviesChunk) + 1
-        } out of ${moviesInChunks.length}! Status: ${response.status}`
+        `Error adding movies with batch ${
+          moviesBatches.indexOf(moviesBatch) + 1
+        } out of ${moviesBatches.length}! Status: ${response.status}`
       );
+    } else {
+      console.log(
+        `Movies batch ${moviesBatches.indexOf(moviesBatch) + 1} out of ${
+          moviesBatches.length
+        } successfully added!`
+      );
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
   }
 };
@@ -193,8 +204,8 @@ async function getAccessTokenWithRefresh() {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const responseData = await response.json();
-    const newAccessToken = responseData.access_token;
-    const newRefreshToken = responseData.refresh_token;
+    newAccessToken = responseData.access_token;
+    newRefreshToken = responseData.refresh_token;
     await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
     await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
     console.log("New Access Token:", newAccessToken);
@@ -233,38 +244,6 @@ async function updateVariableGroupVariable(variableName, variableValue) {
   }
 }
 
-async function getAccessToken() {
-  const traktApiUrl = "https://api.trakt.tv/oauth/token";
-  try {
-    const response = await fetch(traktApiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: "79c680c0dcd70ee903eb56aca22c1e9c23b520e729505c2b3221f22f6989b2d7",
-        client_id: traktClientId,
-        client_secret: traktClientSecret,
-        redirect_uri: "https://google.com",
-        grant_type: "authorization_code",
-      }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const responseData = await response.json();
-    const accessToken = responseData.access_token;
-    const refreshToken = responseData.refresh_token;
-    await updateVariableGroupVariable("TRAKTACCESSTOKEN", accessToken);
-    await updateVariableGroupVariable("TRAKTREFRESHTOKEN", refreshToken);
-    console.log("New Access Token:", accessToken);
-    console.log("New Refresh Token:", refreshToken);
-    return accessToken;
-  } catch (error) {
-    console.error("Error getting access token:", error.message);
-    throw error;
-  }
-}
-
-// getAccessToken();
 exportToTrakt();
+console.log(`Current access token: ${newAccessToken}`)
+console.log(`Current refresh token: ${newRefreshToken}`)
