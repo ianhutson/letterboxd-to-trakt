@@ -14,13 +14,13 @@ jobs:
       vmImage: "ubuntu-latest"
 
     steps:
-      # - download: current
-      #   artifact: "myartifacts"
+      - download: current
+        artifact: "myartifacts"
 
-      # - script: |
-      #     TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/myartifacts/myconfig.txt)
-      #     echo "My variable value is: $TRAKTACCESSTOKEN"
-      #   displayName: "Read Artifact and Set Variable"
+      - script: |
+          TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/myartifacts/accessToken.txt)
+          echo "My variable value is: $TRAKTACCESSTOKEN"
+        displayName: "Read Artifact and Set Variable"
 
       # - script: |
       #     rm -rf $(Build.ArtifactStagingDirectory)/*
@@ -32,9 +32,9 @@ jobs:
       #     node --experimental-modules run.mjs
       #   displayName: "Run Script"
 
-      - task: PublishBuildArtifacts@1
-        inputs:
-          pathtoPublish: "accessToken.txt"
-          artifactName: "accessToken"
-          publishLocation: "Container"
-        displayName: "Publish Artifact"
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     pathtoPublish: "accessToken.txt"
+      #     artifactName: "accessToken"
+      #     publishLocation: "Container"
+      #   displayName: "Publish Artifact"
