@@ -36,6 +36,8 @@ jobs:
       - task: PublishBuildArtifacts@1
         inputs:
           targetPath: '$(Build.SourcesDirectory)/accessToken.txt'
+          - script: |
+            ls -l $(Build.SourcesDirectory)
           artifactName: "accessToken"
         displayName: "Publish Artifact"
         continueOnError: true
