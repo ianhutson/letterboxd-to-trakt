@@ -8,12 +8,33 @@ schedules:
         - "*"
 
 jobs:
-- job: sync
-  displayName: Sync Lists
-  pool:
-    vmImage: "ubuntu-latest"
-  steps:
-    - script: |
-        npm install
-        node --experimental-modules run.mjs
-      displayName: "Run Script"
+  - job: sync
+    displayName: Sync Lists
+    pool:
+      vmImage: "ubuntu-latest"
+
+    steps:
+      # - download: current
+      #   artifact: "myartifacts"
+
+      # - script: |
+      #     TRAKTACCESSTOKEN=$(cat $(Pipeline.Workspace)/myartifacts/myconfig.txt)
+      #     echo "My variable value is: $TRAKTACCESSTOKEN"
+      #   displayName: "Read Artifact and Set Variable"
+
+      # - script: |
+      #     rm -rf $(Build.ArtifactStagingDirectory)/*
+      #   displayName: "Delete Artifacts"
+      #   condition: succeeded()
+
+      # - script: |
+      #     npm install
+      #     node --experimental-modules run.mjs
+      #   displayName: "Run Script"
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: "$(Build.ArtifactStagingDirectory)"
+          artifactName: "accessToken"
+          publishLocation: "Container"
+        displayName: "Publish Artifact"
