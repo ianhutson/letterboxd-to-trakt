@@ -1,12 +1,10 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 import dotenv from "dotenv";
-import fs from "fs";
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
-const oldAccessToken = process.env.TRAKTACCESSTOKEN;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 
 const fetchWatchlistPage = async (page) => {
@@ -199,7 +197,6 @@ async function getAccessTokenWithRefresh() {
     const newRefreshToken = responseData.refresh_token;
     await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
     await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
-    await updateEnvFile(newRefreshToken, newAccessToken);
     console.log("New Access Token:", newAccessToken);
     console.log("New Refresh Token:", newRefreshToken);
     return newAccessToken;
@@ -233,25 +230,6 @@ async function updateVariableGroupVariable(variableName, variableValue) {
     console.log(`Variable '${variableName}' updated successfully.`);
   } catch (error) {
     console.error("Error:", error.message);
-  }
-}
-
-async function updateEnvFile(traktRefreshToken, traktAccessToken) {
-  const envFilePath = ".env";
-  try {
-    let envContent = await fs.readFileSync(envFilePath, "utf-8");
-    envContent = envContent.replace(
-      /TRAKTREFRESHTOKEN=.*$/,
-      `TRAKTREFRESHTOKEN=${traktRefreshToken}`
-    );
-    envContent = envContent.replace(
-      /TRAKTACCESSTOKEN=.*$/,
-      `TRAKTACCESSTOKEN=${traktAccessToken}`
-    );
-    await fs.writeFileSync(envFilePath, envContent, "utf-8");
-    console.log("Values updated in .env file.");
-  } catch (error) {
-    console.error("Error updating .env file:", error.message);
   }
 }
 
