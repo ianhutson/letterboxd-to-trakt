@@ -1,3 +1,7 @@
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+import { updateVariableGroupVariable } from "./run.mjs";
+dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
@@ -13,7 +17,7 @@ async function getAccessToken() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        code: '0ed825aafe0415bd361aa3f728779336d3172e108dedf334112f76f25ceb4a2f',
+        code: "cd82eaf17204e8d19e0776d572007b2782eaa912f6515118a6a388e0f9ba4603",
         client_id: traktClientId,
         client_secret: traktClientSecret,
         redirect_uri: "https://google.com",
@@ -37,4 +41,4 @@ async function getAccessToken() {
   }
 }
 
-getAccessToken()
+getAccessToken();

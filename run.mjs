@@ -221,7 +221,7 @@ async function getAccessTokenWithRefresh() {
   }
 }
 
-async function updateVariableGroupVariable(variableName, variableValue) {
+export async function updateVariableGroupVariable(variableName, variableValue) {
   const organization = "yanhutson";
   const project = "letterdboxd-to-trakt";
   const variableGroupId = "1";
@@ -230,7 +230,9 @@ async function updateVariableGroupVariable(variableName, variableValue) {
   const url = `https://dev.azure.com/${organization}/${project}/_apis/distributedtask/variablegroups/${variableGroupId}?api-version=6.0-preview.2`;
   const headers = {
     "Content-Type": "application/json",
-    Authorization: `Basic ${Buffer.from(`:${personalAccessToken}`).toString("base64")}`,
+    Authorization: `Basic ${Buffer.from(`:${personalAccessToken}`).toString(
+      "base64"
+    )}`,
   };
   let retries = 0;
   while (retries < maxRetries) {
@@ -246,12 +248,17 @@ async function updateVariableGroupVariable(variableName, variableValue) {
       console.log(`Variable '${variableName}' updated successfully.`);
       return; // Break out of the loop if successful
     } catch (error) {
-      console.error(`Error (Attempt ${retries + 1}/${maxRetries}):`, error.message);
+      console.error(
+        `Error (Attempt ${retries + 1}/${maxRetries}):`,
+        error.message
+      );
       retries++;
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
-  console.error(`Failed to update variable '${variableName}' after ${maxRetries} attempts.`);
+  console.error(
+    `Failed to update variable '${variableName}' after ${maxRetries} attempts.`
+  );
 }
 
 exportToTrakt();
