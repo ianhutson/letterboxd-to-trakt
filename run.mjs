@@ -236,7 +236,7 @@ async function updateVariableGroupVariable(variableName, variableValue) {
   while (retries < maxRetries) {
     try {
       const response = await fetch(url, { method: "GET", headers });
-      const responseData = await response.clone().json();
+      const responseData = await response.json();
       responseData.variables[variableName].value = variableValue;
       await fetch(url, {
         method: "PUT",
