@@ -4,7 +4,8 @@
   "description": "letterboxd to trakt app",
   "main": "",
   "scripts": {
-    "go": "node --experimental-modules run.mjs"
+    "go": "node --experimental-modules run.mjs",
+    "token": "node --experimental-modules token.mjs"
   },
   "author": "ian",
   "license": "ISC",
