@@ -240,11 +240,12 @@ export async function updateVariableGroupVariable(variableName, variableValue) {
       const response = await fetch(url, { method: "GET", headers });
       const responseData = await response.json();
       responseData.variables[variableName].value = variableValue;
-      await fetch(url, {
+      const secondResponse = await fetch(url, {
         method: "PUT",
         headers,
         body: JSON.stringify(responseData),
       });
+      console.log(secondResponse)
       console.log(`Variable '${variableName}' updated successfully.`);
       return; // Break out of the loop if successful
     } catch (error) {
