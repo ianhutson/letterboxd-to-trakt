@@ -142,36 +142,23 @@ const addToTrakt = async (movieTitles) => {
       });
     }
   }
-  const moviesBatches = [];
-  for (let i = 0; i < movies.length; i += 10) {
-    moviesBatches.push(movies.slice(i, i + 10));
-  }
-  for (const moviesBatch of moviesBatches) {
-    console.log("Attempting to add the following movies-");
-    console.log(moviesBatch);
-    const requestBody = {
-      movies: moviesBatch,
-    };
-    const response = await fetch(traktApiUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(requestBody),
-    });
-    if (!response.ok) {
-      console.log("Response:" + (await response.text()));
-      throw new Error(
-        `Error adding movies with batch ${
-          moviesBatches.indexOf(moviesBatch) + 1
-        } out of ${moviesBatches.length}! Status: ${response.status}`
-      );
-    } else {
-      console.log(
-        `Movies batch ${moviesBatches.indexOf(moviesBatch) + 1} out of ${
-          moviesBatches.length
-        } successfully added!`
-      );
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
+  console.log("Attempting to add the following movies-");
+  console.log(movies);
+  const requestBody = {
+    movies: movies,
+  };
+  const response = await fetch(traktApiUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(requestBody),
+  });
+  if (!response.ok) {
+    console.log("Response:" + (await response.text()));
+    throw new Error(
+      `Error adding movies with batch ${
+        moviesBatches.indexOf(moviesBatch) + 1
+      } out of ${moviesBatches.length}! Status: ${response.status}`
+    );
   }
 };
 
