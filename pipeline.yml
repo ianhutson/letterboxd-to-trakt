@@ -1,9 +1,6 @@
 schedules:
-  - cron: "0 */12 * * *"
-    displayName: "Every 12 hours"
-    branches:
-      include:
-        - "*"
+- cron: "0 4 * * *"
+  displayName: "Every day at 4 AM"
 
 variables:
   - group: ApiKeys
@@ -19,4 +16,3 @@ jobs:
           npm install
           node --experimental-modules run.mjs
         displayName: "Run Script"
-        continueOnError: true
