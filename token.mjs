@@ -17,7 +17,7 @@ async function getAccessToken() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        code: "cd82eaf17204e8d19e0776d572007b2782eaa912f6515118a6a388e0f9ba4603",
+        code: "",
         client_id: traktClientId,
         client_secret: traktClientSecret,
         redirect_uri: "https://google.com",
