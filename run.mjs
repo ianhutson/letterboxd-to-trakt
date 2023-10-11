@@ -7,13 +7,14 @@ const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
+const letterboxdUsername = process.env.LETTERBOXDUSERNAME
 let newAccessToken;
 let newRefreshToken;
 
 const fetchWatchlistPage = async (page) => {
   try {
     const response = await fetch(
-      `https://letterboxd.com/ayygux/watchlist/page/${page}/`
+      `https://letterboxd.com/${letterboxdUsername}/watchlist/page/${page}/`
     );
     const watchlistPage = await response.text();
     return watchlistPage;
