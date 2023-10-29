@@ -1,6 +1,7 @@
 schedules:
 - cron: "0 4 * * *"
   displayName: "Every day at 4 AM"
+  always: true
   branches:
     include:
     - main
