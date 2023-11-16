@@ -24,8 +24,8 @@ const fetchWatchlistPage = async (page) => {
   }
 };
 
-const fetchAllWatchlistPages = async () => {
-  const response = await fetch("https://letterboxd.com/ayygux/watchlist/");
+const fetchAllWatchlistPages = async (url) => {
+  const response = await fetch(url);
   const watchlistPage = await response.text();
   const $ = cheerio.load(watchlistPage);
   const lastPage = parseInt($("li.paginate-page").last().text(), 10);
@@ -165,7 +165,9 @@ const addToTrakt = async (movieTitles) => {
 
 async function exportToTrakt() {
   try {
-    const movies = await fetchAllWatchlistPages();
+    let movies = []
+    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/"));
+    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/"))
     await addToTrakt(movies);
     console.log("Movies added to Trakt watchlist");
   } catch (error) {
