@@ -128,7 +128,10 @@ const addToTrakt = async (movieTitles) => {
     Authorization: `Bearer ${newTraktToken}`,
   };
   const movies = [];
-  console.log(`beginning search for movie details for- \n ${movieTitles}`)
+  console.log('beginning search for movie details for:')
+  for (const movieTitle of movieTitles){
+    console.log(movieTitle.replace('-', ' '))
+  }
   for (const movieTitle of movieTitles) {
     const tmdbMovieDetails = await fetchMovieDetailsFromTMDb(movieTitle);
     const traktMovieDetails = await fetchTraktMovieDetails(movieTitle);
