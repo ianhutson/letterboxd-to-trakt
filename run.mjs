@@ -168,9 +168,15 @@ const addToTrakt = async (movieTitles) => {
 async function exportToTrakt() {
   try {
     let movies = []
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/"));
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/"))
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/"))
+    for (const movie of await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/")){
+      movies.push(movie)
+    }
+    for (const movie of await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/")){
+      movies.push(movie)
+    }
+    for (const movie of await fetchAllWatchlistPages("https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/")){
+      movies.push(movie)
+    }
     await addToTrakt(movies);
     console.log("Movies added to Trakt watchlist");
   } catch (error) {
