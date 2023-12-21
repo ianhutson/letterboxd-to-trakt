@@ -7,7 +7,7 @@ const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
-const letterboxdUsername = process.env.LETTERBOXDUSERNAME
+const letterboxdUsername = process.env.LETTERBOXDUSERNAME;
 let newAccessToken;
 let newRefreshToken;
 
@@ -71,7 +71,6 @@ const fetchMovieDetailsFromTMDb = async (movieTitle) => {
     return null;
   } catch (error) {
     console.error("Error fetching movie details from TMDb:", error);
-    throw error;
   }
 };
 
@@ -131,7 +130,7 @@ const addToTrakt = async (movieTitles) => {
     const tmdbMovieDetails = await fetchMovieDetailsFromTMDb(movieTitle);
     const traktMovieDetails = await fetchTraktMovieDetails(movieTitle);
     if (tmdbMovieDetails && traktMovieDetails) {
-      console.log(`found details for: ${movie.title}`)
+      console.log(`found details for: ${movie.title}`);
       movies.push({
         title: tmdbMovieDetails.title,
         year: tmdbMovieDetails.year,
@@ -166,10 +165,18 @@ const addToTrakt = async (movieTitles) => {
 
 async function exportToTrakt() {
   try {
-    let movies = []
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/"));
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/"))
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/"))
+    let movies = [];
+    movies.push(
+      await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/")
+    );
+    movies.push(
+      await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/")
+    );
+    movies.push(
+      await fetchAllWatchlistPages(
+        "https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/"
+      )
+    );
     await addToTrakt(movies);
     console.log("Movies added to Trakt watchlist");
   } catch (error) {
