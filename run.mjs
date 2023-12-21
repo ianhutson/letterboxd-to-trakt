@@ -7,7 +7,7 @@ const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
-const letterboxdUsername = process.env.LETTERBOXDUSERNAME
+const letterboxdUsername = process.env.LETTERBOXDUSERNAME;
 let newAccessToken;
 let newRefreshToken;
 
@@ -49,7 +49,8 @@ const parseWatchlistPage = (pageHtml) => {
 };
 
 const fetchMovieDetailsFromTMDb = async (movieTitle) => {
-  try {
+  let retriesRemaining = 10;
+  while (retriesRemaining > 10) {
     const response = await fetch(
       `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(
         movieTitle
@@ -67,11 +68,10 @@ const fetchMovieDetailsFromTMDb = async (movieTitle) => {
           tmdb: movie.id,
         },
       };
+    } else {
+      retriesRemaining--;
+      setTimeout(() => console.log("waited 1 second to retry tmdb api call"), 1000);
     }
-    return null;
-  } catch (error) {
-    console.error("Error fetching movie details from TMDb:", error);
-    throw error;
   }
 };
 
@@ -165,10 +165,18 @@ const addToTrakt = async (movieTitles) => {
 
 async function exportToTrakt() {
   try {
-    let movies = []
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/"));
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/"))
-    movies.push(await fetchAllWatchlistPages("https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/"))
+    let movies = [];
+    movies.push(
+      await fetchAllWatchlistPages("https://letterboxd.com/ayygux/watchlist/")
+    );
+    movies.push(
+      await fetchAllWatchlistPages("https://letterboxd.com/yanhut/watchlist/")
+    );
+    movies.push(
+      await fetchAllWatchlistPages(
+        "https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/"
+      )
+    );
     await addToTrakt(movies);
     console.log("Movies added to Trakt watchlist");
   } catch (error) {
