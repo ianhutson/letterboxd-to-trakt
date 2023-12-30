@@ -174,7 +174,6 @@ async function updateVariableGroupVariable(variableName, variableValue) {
     body: JSON.stringify(responseData),
   });
   console.log(`Variable '${variableName}' updated successfully.`);
-
   console.log(`Current ${variableName}: ${variableValue}`);
 }
 
