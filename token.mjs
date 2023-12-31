@@ -1,12 +1,45 @@
 import fetch from "node-fetch";
 import dotenv from "dotenv";
-import { updateVariableGroupVariable } from "./run.mjs";
+import fs from 'fs'
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 let newAccessToken;
 let newRefreshToken;
+
+async function updateVariableGroupVariable(variableName, variableValue) {
+  const organization = "yanhutson";
+  const project = "letterdboxd-to-trakt";
+  const variableGroupId = "1";
+  const personalAccessToken = process.env.AZUREACCESSTOKEN;
+  const url = `https://dev.azure.com/${organization}/${project}/_apis/distributedtask/variablegroups/${variableGroupId}?api-version=6.0-preview.2`;
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Basic ${Buffer.from(`:${personalAccessToken}`).toString(
+      "base64"
+    )}`,
+  };
+  const response = await fetch(url, { method: "GET", headers });
+  const responseData = await response.json();
+  responseData.variables[variableName].value = variableValue;
+  await fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(responseData),
+  });
+  if (fs.existsSync(".env")) {
+    const envConfig = dotenv.parse(fs.readFileSync(".env"));
+    if (envConfig.hasOwnProperty(variableName)) {
+      envConfig[variableName] = variableValue;
+      const updatedEnvFileContent = Object.entries(envConfig)
+        .map(([key, value]) => `${key}=${value}`)
+        .join("\n");
+      fs.writeFileSync(".env", updatedEnvFileContent);
+    }
+    console.log(`New ${variableName}: ${variableValue}`);
+  }
+}
 
 async function getAccessToken() {
   const traktApiUrl = "https://api.trakt.tv/oauth/token";
@@ -17,7 +50,7 @@ async function getAccessToken() {
     },
     body: JSON.stringify({
       // go to trakt website, authorize with oauth, copy code from url
-      code: "f681177cc71fc1d1f51de6899937fa06c3b20eed2f2979e17182945adfee4835",
+      code: "a17defbf013ae9701ab3281e579799812b28c888e16f161ba0d8490a8c996a60",
       client_id: traktClientId,
       client_secret: traktClientSecret,
       redirect_uri: "https://google.com",
@@ -30,8 +63,6 @@ async function getAccessToken() {
   console.log(newRefreshToken)
   await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
   await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
-  console.log("New Access Token:", newAccessToken);
-  console.log("New Refresh Token:", newRefreshToken);
   return newAccessToken;
 }
 

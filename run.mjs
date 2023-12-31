@@ -1,13 +1,13 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 import dotenv from "dotenv";
+import fs from 'fs'
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
-const letterboxdUsername = process.env.LETTERBOXDUSERNAME;
 let newAccessToken;
 let newRefreshToken;
 
@@ -18,9 +18,6 @@ async function exportToTrakt() {
     )),
     ...(await fetchAndParseAllWatchlistPages(
       "https://letterboxd.com/yanhut/watchlist/"
-    )),
-    ...(await fetchAndParseAllWatchlistPages(
-      "https://letterboxd.com/ayygux/list/alyssas-2023-criterion-challenge/"
     )),
   ];
   const newTraktToken = await getAccessTokenWithRefresh();
@@ -65,10 +62,20 @@ async function fetchAndParseAllWatchlistPages(url) {
   const $ = cheerio.load(watchlistPage);
   const lastPage = parseInt($("li.paginate-page").last().text(), 10);
   const allMovieTitles = [];
-  for (let currentPage = 1; currentPage <= lastPage; currentPage++) {
-    const pageHtmlResponse = await fetch(
-      `https://letterboxd.com/${letterboxdUsername}/watchlist/page/${currentPage}/`
-    );
+  if (url.includes("watchlist")) {
+    for (let currentPage = 1; currentPage <= lastPage; currentPage++) {
+      const pageHtmlResponse = await fetch(`${url}/page/${currentPage}/`);
+      const pageHtml = await pageHtmlResponse.text();
+      const $ = cheerio.load(pageHtml);
+      const movieTitles = [];
+      $(".poster-list .film-poster").each((index, element) => {
+        const titleSlug = $(element).attr("data-film-slug");
+        movieTitles.push(titleSlug);
+      });
+      allMovieTitles.push(...movieTitles);
+    }
+  } else {
+    const pageHtmlResponse = await fetch(`${url}`);
     const pageHtml = await pageHtmlResponse.text();
     const $ = cheerio.load(pageHtml);
     const movieTitles = [];
@@ -153,7 +160,7 @@ async function getAccessTokenWithRefresh() {
   return newAccessToken;
 }
 
-export async function updateVariableGroupVariable(variableName, variableValue) {
+async function updateVariableGroupVariable(variableName, variableValue) {
   const organization = "yanhutson";
   const project = "letterdboxd-to-trakt";
   const variableGroupId = "1";
@@ -173,8 +180,17 @@ export async function updateVariableGroupVariable(variableName, variableValue) {
     headers,
     body: JSON.stringify(responseData),
   });
-  console.log(`Variable '${variableName}' updated successfully.`);
-  console.log(`Current ${variableName}: ${variableValue}`);
+  if (fs.existsSync(".env")) {
+    const envConfig = dotenv.parse(fs.readFileSync(".env"));
+    if (envConfig.hasOwnProperty(variableName)) {
+      envConfig[variableName] = variableValue;
+      const updatedEnvFileContent = Object.entries(envConfig)
+        .map(([key, value]) => `${key}=${value}`)
+        .join("\n");
+      fs.writeFileSync(".env", updatedEnvFileContent);
+    }
+    console.log(`New ${variableName}: ${variableValue}`);
+  }
 }
 
 exportToTrakt();
