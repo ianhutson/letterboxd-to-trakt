@@ -153,7 +153,7 @@ async function getAccessTokenWithRefresh() {
   return newAccessToken;
 }
 
-async function updateVariableGroupVariable(variableName, variableValue) {
+export async function updateVariableGroupVariable(variableName, variableValue) {
   const organization = "yanhutson";
   const project = "letterdboxd-to-trakt";
   const variableGroupId = "1";
