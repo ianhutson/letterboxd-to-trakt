@@ -180,14 +180,14 @@ async function updateVariableGroupVariable(variableName, variableValue) {
     headers,
     body: JSON.stringify(responseData),
   });
-  if (fs.existsSync(".env")) {
+  if (await fs.existsSync(".env")) {
     const envConfig = dotenv.parse(fs.readFileSync(".env"));
     if (envConfig.hasOwnProperty(variableName)) {
       envConfig[variableName] = variableValue;
       const updatedEnvFileContent = Object.entries(envConfig)
         .map(([key, value]) => `${key}=${value}`)
         .join("\n");
-      fs.writeFileSync(".env", updatedEnvFileContent);
+      await fs.writeFileSync(".env", updatedEnvFileContent);
     }
     console.log(`New ${variableName}: ${variableValue}`);
   }
