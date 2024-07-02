@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 import dotenv from "dotenv";
-import fs from 'fs'
+import fs from "fs";
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
@@ -10,6 +10,8 @@ const tmdbApiKey = process.env.TMDBAPIKEY;
 const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
 let newAccessToken;
 let newRefreshToken;
+let notFoundFromTmdb = [];
+let notFoundFromTrakt = [];
 
 async function exportToTrakt() {
   const movieTitles = [
@@ -30,8 +32,8 @@ async function exportToTrakt() {
   };
   const movies = [];
   for (const movieTitle of movieTitles) {
-    const tmdbMovieDetails = await fetchMovieDetailsFromTMDb(movieTitle);
-    const traktMovieDetails = await fetchTraktMovieDetails(movieTitle);
+    const tmdbMovieDetails = await fetchMovieDetailsFromTmdb(movieTitle.trim());
+    const traktMovieDetails = await fetchTraktMovieDetails(movieTitle.trim());
     if (tmdbMovieDetails && traktMovieDetails) {
       movies.push({
         title: tmdbMovieDetails.title,
@@ -53,7 +55,22 @@ async function exportToTrakt() {
     headers,
     body: JSON.stringify(requestBody),
   });
-  console.log("Movies successfully added to Trakt watchlist");
+  if (notFoundFromTmdb.length > 0) {
+    console.log("The following were not found from tmdb-");
+    for (const movie of notFoundFromTmdb) {
+      console.log(movie);
+    }
+  }
+  if (notFoundFromTrakt.length > 0) {
+    console.log("===================");
+    console.log("The following were not found from trakt-");
+    for (const movie of notFoundFromTrakt) {
+      if (!notFoundFromTmdb.includes(movie)) {
+        console.log(movie);
+      }
+    }
+  }
+  console.log("Finished adding movies to Trakt.");
 }
 
 async function fetchAndParseAllWatchlistPages(url) {
@@ -88,13 +105,11 @@ async function fetchAndParseAllWatchlistPages(url) {
   return allMovieTitles;
 }
 
-async function fetchMovieDetailsFromTMDb(movieTitle) {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(
-      movieTitle
-    )}`
+async function fetchMovieDetailsFromTmdb(movieTitle) {
+  let response = await fetch(
+    `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${movieTitle}`
   );
-  const data = await response.json();
+  let data = await response.json();
   if (data.results && data.results.length > 0) {
     const movie = data.results[0];
     return {
@@ -106,13 +121,39 @@ async function fetchMovieDetailsFromTMDb(movieTitle) {
         tmdb: movie.id,
       },
     };
+  } else {
+    const regex = /-\d{4}$/;
+    let formattedTitle;
+    if (regex.test(movieTitle)) {
+      formattedTitle = movieTitle.slice(0, -5);
+    } else {
+      return;
+    }
+    response = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${formattedTitle}`
+    );
+    data = await response.json();
+    if (data.results && data.results.length > 0) {
+      const movie = data.results[0];
+      return {
+        title: movie.title,
+        year: movie.release_date
+          ? new Date(movie.release_date).getFullYear()
+          : null,
+        ids: {
+          tmdb: movie.id,
+        },
+      };
+    }
+    notFoundFromTmdb.push(formattedTitle);
+    return null;
   }
-  return null;
 }
 
 async function fetchTraktMovieDetails(movieTitle) {
-  const response = await fetch(
-    `https://api.trakt.tv/search/movie?query=${encodeURIComponent(movieTitle)}`,
+  const formattedTitle = movieTitle.replace(/-/g, " ");
+  let response = await fetch(
+    `https://api.trakt.tv/search/movie?query=${formattedTitle}`,
     {
       timeout: 75000,
       headers: {
@@ -122,7 +163,7 @@ async function fetchTraktMovieDetails(movieTitle) {
       },
     }
   );
-  const data = await response.json();
+  let data = await response.json();
   if (data && data.length > 0) {
     const movie = data[0].movie;
     return {
@@ -133,6 +174,7 @@ async function fetchTraktMovieDetails(movieTitle) {
       },
     };
   }
+  notFoundFromTrakt.push(formattedTitle);
   return null;
 }
 
@@ -155,6 +197,8 @@ async function getAccessTokenWithRefresh() {
   newAccessToken = await responseData.access_token;
   newRefreshToken = await responseData.refresh_token;
   console.log(`Old refresh token: ${traktRefreshToken}`);
+  console.log(`New refresh token: ${newRefreshToken}`);
+  console.log(`New access token: ${newAccessToken}`);
   await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
   await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
   return newAccessToken;
@@ -180,7 +224,7 @@ async function updateVariableGroupVariable(variableName, variableValue) {
     headers,
     body: JSON.stringify(responseData),
   });
-  if (await fs.existsSync(".env")) {
+  {
     const envConfig = dotenv.parse(fs.readFileSync(".env"));
     if (envConfig.hasOwnProperty(variableName)) {
       envConfig[variableName] = variableValue;
@@ -189,7 +233,6 @@ async function updateVariableGroupVariable(variableName, variableValue) {
         .join("\n");
       await fs.writeFileSync(".env", updatedEnvFileContent);
     }
-    console.log(`New ${variableName}: ${variableValue}`);
   }
 }
 

@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import dotenv from "dotenv";
-import fs from 'fs'
+import fs from "fs";
 dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
@@ -50,7 +50,7 @@ async function getAccessToken() {
     },
     body: JSON.stringify({
       // go to trakt website, authorize with oauth, copy code from url
-      code: "8b5f251889a2924d1ab5a940a94ca43b5ad3d104d06c598a1d50a2b2e27ec7de",
+      code: "dd49bd46a12f0a1e13d5b7d975dd95bdd68879ef3b97075cfdbf9c65f4dc91ab",
       client_id: traktClientId,
       client_secret: traktClientSecret,
       redirect_uri: "https://google.com",
@@ -58,10 +58,9 @@ async function getAccessToken() {
     }),
   });
   const responseData = await response.json();
-  console.log(responseData)
+  console.log(responseData);
   newAccessToken = responseData.access_token;
   newRefreshToken = responseData.refresh_token;
-  console.log(newRefreshToken)
   await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
   await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
   return newAccessToken;
