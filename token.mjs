@@ -50,7 +50,7 @@ async function getAccessToken() {
     },
     body: JSON.stringify({
       // go to trakt website, authorize with oauth, copy code from url
-      code: "dd49bd46a12f0a1e13d5b7d975dd95bdd68879ef3b97075cfdbf9c65f4dc91ab",
+      code: "8d9ce5ed0d3391cfad6d497a5e6a25f1fb6cb28e59c480333a24f8fe4d24201a",
       client_id: traktClientId,
       client_secret: traktClientSecret,
       redirect_uri: "https://google.com",
@@ -58,7 +58,6 @@ async function getAccessToken() {
     }),
   });
   const responseData = await response.json();
-  console.log(responseData);
   newAccessToken = responseData.access_token;
   newRefreshToken = responseData.refresh_token;
   await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
