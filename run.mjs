@@ -50,7 +50,7 @@ async function exportToTrakt() {
   const requestBody = {
     movies: movies,
   };
-  const response = await fetch(traktApiUrl, {
+  await fetch(traktApiUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(requestBody),
