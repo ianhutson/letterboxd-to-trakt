@@ -224,7 +224,7 @@ async function updateVariableGroupVariable(variableName, variableValue) {
     headers,
     body: JSON.stringify(responseData),
   });
-  if (await fs.existsSync(filePath)) {
+  if (await fs.existsSync(".env")) {
     const envConfig = dotenv.parse(await fs.readFileSync(".env"));
     if (envConfig.hasOwnProperty(variableName)) {
       envConfig[variableName] = variableValue;
