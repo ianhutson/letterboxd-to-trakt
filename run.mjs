@@ -4,32 +4,42 @@ import dotenv from "dotenv";
 import fs from "fs";
 dotenv.config();
 
+// azure config
+const azureOrganization = "yanhutson";
+const azureProject = "letterdboxd-to-trakt";
+const azureVariableGroupId = "1";
+const azurePersonalAccessToken = process.env.AZUREACCESSTOKEN;
+
+// trakt keys
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
-const tmdbApiKey = process.env.TMDBAPIKEY;
 const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
+
+// tmdb key
+const tmdbApiKey = process.env.TMDBAPIKEY;
+
+// any letterboxd user watchlists you'd like to sync
+const letterboxdUsernames = ["yanhut", "ayygux"];
+
 let newAccessToken;
 let newRefreshToken;
 let notFoundFromTmdb = [];
 let notFoundFromTrakt = [];
 
-async function exportToTrakt() {
-  const movieTitles = [
-    ...(await fetchAndParseAllWatchlistPages(
-      "https://letterboxd.com/ayygux/watchlist/"
-    )),
-    ...(await fetchAndParseAllWatchlistPages(
-      "https://letterboxd.com/yanhut/watchlist/"
-    )),
-  ];
-  const newTraktToken = await getAccessTokenWithRefresh();
-  const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
-  const headers = {
-    "Content-Type": "application/json",
-    "trakt-api-version": "2",
-    "trakt-api-key": traktClientId,
-    Authorization: `Bearer ${newTraktToken}`,
-  };
+
+async function getMoviesFromLetterboxd() {
+  const watchlistUrls = letterboxdUsernames.map(
+    (username) => `https://letterboxd.com/${username}/watchlist/`
+  );
+  const movieTitles = (
+    await Promise.all(
+      watchlistUrls.map((url) => fetchAndParseAllWatchlistPages(url))
+    )
+  ).flat();
+  return movieTitles
+}
+
+async function getMovieInfoFromTraktAndTmdb(movieTitles){
   const movies = [];
   for (const movieTitle of movieTitles) {
     const tmdbMovieDetails = await fetchMovieDetailsFromTmdb(movieTitle.trim());
@@ -47,6 +57,20 @@ async function exportToTrakt() {
       });
     }
   }
+  return movies
+}
+
+async function exportToTrakt() {
+  const movieTitles = await getMoviesFromLetterboxd()
+  const newTraktToken = await getAccessTokenWithRefresh();
+  const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
+  const headers = {
+    "Content-Type": "application/json",
+    "trakt-api-version": "2",
+    "trakt-api-key": traktClientId,
+    Authorization: `Bearer ${newTraktToken}`,
+  };
+  const movies = await getMovieInfoFromTraktAndTmdb(movieTitles)
   const requestBody = {
     movies: movies,
   };
@@ -205,16 +229,12 @@ async function getAccessTokenWithRefresh() {
 }
 
 async function updateVariableGroupVariable(variableName, variableValue) {
-  const organization = "yanhutson";
-  const project = "letterdboxd-to-trakt";
-  const variableGroupId = "1";
-  const personalAccessToken = process.env.AZUREACCESSTOKEN;
-  const url = `https://dev.azure.com/${organization}/${project}/_apis/distributedtask/variablegroups/${variableGroupId}?api-version=6.0-preview.2`;
+  const url = `https://dev.azure.com/${azureOrganization}/${azureProject}/_apis/distributedtask/variablegroups/${azureVariableGroupId}?api-version=6.0-preview.2`;
   const headers = {
     "Content-Type": "application/json",
-    Authorization: `Basic ${Buffer.from(`:${personalAccessToken}`).toString(
-      "base64"
-    )}`,
+    Authorization: `Basic ${Buffer.from(
+      `:${azurePersonalAccessToken}`
+    ).toString("base64")}`,
   };
   const response = await fetch(url, { method: "GET", headers });
   const responseData = await response.json();
