@@ -35,7 +35,7 @@ async function getMoviesFromLetterboxd() {
     await Promise.all(
       watchlistUrls.map((url) => fetchAndParseAllWatchlistPages(url))
     )
-  ).flat();
+  )
   return movieTitles
 }
 
