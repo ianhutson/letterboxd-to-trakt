@@ -42,8 +42,8 @@ async function getMoviesFromLetterboxd() {
 async function getMovieInfoFromTraktAndTmdb(movieTitles){
   const movies = [];
   for (const movieTitle of movieTitles) {
-    const tmdbMovieDetails = await fetchMovieDetailsFromTmdb(movieTitle.trim());
-    const traktMovieDetails = await fetchTraktMovieDetails(movieTitle.trim());
+    const tmdbMovieDetails = await fetchMovieDetailsFromTmdb(movieTitle);
+    const traktMovieDetails = await fetchTraktMovieDetails(movieTitle);
     if (tmdbMovieDetails && traktMovieDetails) {
       movies.push({
         title: tmdbMovieDetails.title,
