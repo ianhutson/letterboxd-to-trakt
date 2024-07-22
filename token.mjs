@@ -50,7 +50,7 @@ async function getAccessToken() {
     },
     body: JSON.stringify({
       // go to trakt website, authorize with oauth, copy code from url
-      code: "44da2cafb13be2e25690bb5dbb72363e8624bc5e792bb6a030eea01f3c1d9351",
+      code: "4ce3392376cae0b1e22f61122d0271f5ad29158f25d9134fdd91888c93d711a7",
       client_id: traktClientId,
       client_secret: traktClientSecret,
       redirect_uri: "https://google.com",

@@ -26,22 +26,19 @@ let newRefreshToken;
 let notFoundFromTmdb = [];
 let notFoundFromTrakt = [];
 
-
 async function getMoviesFromLetterboxd() {
   const watchlistUrls = letterboxdUsernames.map(
     (username) => `https://letterboxd.com/${username}/watchlist/`
   );
-  const movieTitles = (
-    await Promise.all(
-      watchlistUrls.map((url) => fetchAndParseAllWatchlistPages(url))
-    )
+  const movieTitles = await Promise.all(
+    watchlistUrls.map((url) => fetchAndParseAllWatchlistPages(url))
   )
-  return movieTitles
+  return (await movieTitles)[0]
 }
 
-async function getMovieInfoFromTraktAndTmdb(movieTitles){
+async function getMovieInfoFromTraktAndTmdb(movieTitles) {
   const movies = [];
-  for (const movieTitle of movieTitles) {
+  for (const movieTitle of await movieTitles) {
     const tmdbMovieDetails = await fetchMovieDetailsFromTmdb(movieTitle);
     const traktMovieDetails = await fetchTraktMovieDetails(movieTitle);
     if (tmdbMovieDetails && traktMovieDetails) {
@@ -57,11 +54,11 @@ async function getMovieInfoFromTraktAndTmdb(movieTitles){
       });
     }
   }
-  return movies
+  return movies;
 }
 
 async function exportToTrakt() {
-  const movieTitles = await getMoviesFromLetterboxd()
+  const movieTitles = await getMoviesFromLetterboxd();
   const newTraktToken = await getAccessTokenWithRefresh();
   const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
@@ -70,7 +67,7 @@ async function exportToTrakt() {
     "trakt-api-key": traktClientId,
     Authorization: `Bearer ${newTraktToken}`,
   };
-  const movies = await getMovieInfoFromTraktAndTmdb(movieTitles)
+  const movies = await getMovieInfoFromTraktAndTmdb(movieTitles);
   const requestBody = {
     movies: movies,
   };
