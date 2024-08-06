@@ -32,8 +32,10 @@ async function getMoviesFromLetterboxd() {
   );
   const movieTitles = await Promise.all(
     watchlistUrls.map((url) => fetchAndParseAllWatchlistPages(url))
-  )
-  return (await movieTitles)[0]
+  );
+  console.log(movieTitles)
+  console.log(movieTitles)
+  return (await movieTitles)[0];
 }
 
 async function getMovieInfoFromTraktAndTmdb(movieTitles) {
@@ -71,7 +73,7 @@ async function exportToTrakt() {
   const requestBody = {
     movies: movies,
   };
-  await fetch(traktApiUrl, {
+  const response = await fetch(traktApiUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(requestBody),
@@ -91,7 +93,11 @@ async function exportToTrakt() {
       }
     }
   }
-  console.log("Finished adding movies to Trakt.");
+  if (response.status == 200 || response.status == 201) {
+    console.log(`Finished syncing ${movies.length} movies to Trakt.`);
+  } else {
+    console.log(`Error: ${response.status} ${response.statusText}`);
+  }
 }
 
 async function fetchAndParseAllWatchlistPages(url) {
@@ -110,7 +116,9 @@ async function fetchAndParseAllWatchlistPages(url) {
         const titleSlug = $(element).attr("data-film-slug");
         movieTitles.push(titleSlug);
       });
-      allMovieTitles.push(...movieTitles);
+      for (const movieTitle of movieTitles){
+        allMovieTitles.push(movieTitle);
+      }
     }
   } else {
     const pageHtmlResponse = await fetch(`${url}`);
@@ -121,7 +129,9 @@ async function fetchAndParseAllWatchlistPages(url) {
       const titleSlug = $(element).attr("data-film-slug");
       movieTitles.push(titleSlug);
     });
-    allMovieTitles.push(...movieTitles);
+    for (const movieTitle of movieTitles){
+      allMovieTitles.push(movieTitle);
+    }
   }
   return allMovieTitles;
 }

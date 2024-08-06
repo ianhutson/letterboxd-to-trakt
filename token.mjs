@@ -5,6 +5,7 @@ dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
+const traktAuthorizationCode = process.env.TRAKTCODE;
 let newAccessToken;
 let newRefreshToken;
 
@@ -50,7 +51,7 @@ async function getAccessToken() {
     },
     body: JSON.stringify({
       // go to trakt website, authorize with oauth, copy code from url
-      code: "4ce3392376cae0b1e22f61122d0271f5ad29158f25d9134fdd91888c93d711a7",
+      code: traktAuthorizationCode,
       client_id: traktClientId,
       client_secret: traktClientSecret,
       redirect_uri: "https://google.com",
