@@ -33,9 +33,13 @@ async function getMoviesFromLetterboxd() {
   const movieTitles = await Promise.all(
     watchlistUrls.map((url) => fetchAndParseAllWatchlistPages(url))
   );
-  console.log(movieTitles)
-  console.log(movieTitles)
-  return (await movieTitles)[0];
+  let returnArray = []
+  for (const movieArray of movieTitles){
+    for (const movie of movieArray){
+      returnArray.push(movie)
+    }
+  }
+  return returnArray
 }
 
 async function getMovieInfoFromTraktAndTmdb(movieTitles) {
