@@ -19,7 +19,7 @@ const traktRefreshToken = process.env.TRAKTREFRESHTOKEN;
 const tmdbApiKey = process.env.TMDBAPIKEY;
 
 // any letterboxd user watchlists you'd like to sync
-const letterboxdUsernames = ["yanhut", "ayygux"];
+const letterboxdUsernames = ["yanhut", "ayygux", "vinceguckin"];
 
 let newAccessToken;
 let newRefreshToken;
