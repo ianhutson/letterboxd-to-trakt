@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import dotenv from "dotenv";
 import fs from "fs";
 dotenv.config();
@@ -228,16 +228,27 @@ async function getAccessTokenWithRefresh() {
       grant_type: "refresh_token",
     }),
   });
+
+  // Log status for debugging
+  console.log("Response status:", response.status);
+
+  // Read the response body once and store it
   const responseData = await response.json();
-  newAccessToken = await responseData.access_token;
-  newRefreshToken = await responseData.refresh_token;
+  console.log("Response data:", responseData);
+
+  // Extract tokens from the stored response
+  newAccessToken = responseData.access_token;
+  newRefreshToken = responseData.refresh_token;
+
   console.log(`Old refresh token: ${traktRefreshToken}`);
   console.log(`New refresh token: ${newRefreshToken}`);
   console.log(`New access token: ${newAccessToken}`);
+
   await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
   await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
   return newAccessToken;
 }
+
 
 async function updateVariableGroupVariable(variableName, variableValue) {
   const url = `https://dev.azure.com/${azureOrganization}/${azureProject}/_apis/distributedtask/variablegroups/${azureVariableGroupId}?api-version=6.0-preview.2`;

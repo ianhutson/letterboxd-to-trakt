@@ -5,7 +5,7 @@ dotenv.config();
 
 const traktClientId = process.env.TRAKTCLIENTID;
 const traktClientSecret = process.env.TRAKTCLIENTSECRET;
-const traktAuthorizationCode = process.env.TRAKTCODE;
+const traktAuthorizationCode = process.env.TRAKTAUTHORIZATIONCODE;
 let newAccessToken;
 let newRefreshToken;
 
@@ -22,13 +22,20 @@ async function updateVariableGroupVariable(variableName, variableValue) {
     )}`,
   };
   const response = await fetch(url, { method: "GET", headers });
-  const responseData = await response.json();
-  responseData.variables[variableName].value = variableValue;
-  await fetch(url, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify(responseData),
-  });
+  const textResponse = await response.text();
+  
+  try {
+    const responseData = JSON.parse(textResponse);
+    responseData.variables[variableName].value = variableValue;
+  
+    await fetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(responseData),
+    });
+  } catch (error) {
+    console.error("Error parsing Azure API response as JSON:", error);
+  }
   if (fs.existsSync(".env")) {
     const envConfig = dotenv.parse(fs.readFileSync(".env"));
     if (envConfig.hasOwnProperty(variableName)) {
@@ -44,26 +51,35 @@ async function updateVariableGroupVariable(variableName, variableValue) {
 
 async function getAccessToken() {
   const traktApiUrl = "https://api.trakt.tv/oauth/token";
-  const response = await fetch(traktApiUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      // go to trakt website, authorize with oauth, copy code from url
-      code: traktAuthorizationCode,
-      client_id: traktClientId,
-      client_secret: traktClientSecret,
-      redirect_uri: "https://google.com",
-      grant_type: "authorization_code",
-    }),
-  });
-  const responseData = await response.json();
-  newAccessToken = responseData.access_token;
-  newRefreshToken = responseData.refresh_token;
-  await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
-  await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
-  return newAccessToken;
+  
+  try {
+    const response = await fetch(traktApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: traktAuthorizationCode,
+        client_id: traktClientId,
+        client_secret: traktClientSecret,
+        redirect_uri: "https://google.com",
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    newAccessToken = responseData.access_token;
+    newRefreshToken = responseData.refresh_token;
+    await updateVariableGroupVariable("TRAKTACCESSTOKEN", newAccessToken);
+    await updateVariableGroupVariable("TRAKTREFRESHTOKEN", newRefreshToken);
+    return newAccessToken;
+  } catch (error) {
+    console.error("Error fetching access token:", error);
+  }
 }
 
 getAccessToken();

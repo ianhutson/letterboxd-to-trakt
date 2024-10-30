@@ -1,6 +1,7 @@
 {
   "name": "letterboxd-to-trakt",
   "version": "1.0.0",
+  "type": "module",
   "description": "letterboxd to trakt app",
   "main": "",
   "scripts": {
@@ -11,7 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.4.5",
     "node-fetch": "^2.7.0"
   }
 }
