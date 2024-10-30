@@ -65,23 +65,31 @@ async function getMovieInfoFromTraktAndTmdb(movieTitles) {
 
 async function exportToTrakt() {
   const movieTitles = await getMoviesFromLetterboxd();
-  const newTraktToken = await getAccessTokenWithRefresh();
+  const newTraktToken = await getAccessTokenWithRefresh();  // Ensure this gets the latest token
   const traktApiUrl = "https://api.trakt.tv/sync/watchlist";
   const headers = {
     "Content-Type": "application/json",
     "trakt-api-version": "2",
     "trakt-api-key": traktClientId,
-    Authorization: `Bearer ${newTraktToken}`,
+    Authorization: `Bearer ${newTraktToken}`,  // Use the new token here
   };
+
   const movies = await getMovieInfoFromTraktAndTmdb(movieTitles);
-  const requestBody = {
-    movies: movies,
-  };
+  const requestBody = { movies: movies };
+
   const response = await fetch(traktApiUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(requestBody),
   });
+
+  if (!response.ok) {
+    console.log(`Error: ${response.status} ${response.statusText}`);
+    const errorResponse = await response.text();
+    console.log("Error details:", errorResponse);  // Log detailed error response
+    return;
+  }
+
   if (notFoundFromTmdb.length > 0) {
     console.log("The following were not found from tmdb-");
     for (const movie of notFoundFromTmdb) {
@@ -97,11 +105,7 @@ async function exportToTrakt() {
       }
     }
   }
-  if (response.status == 200 || response.status == 201) {
-    console.log(`Finished syncing ${movies.length} movies to Trakt.`);
-  } else {
-    console.log(`Error: ${response.status} ${response.statusText}`);
-  }
+  console.log(`Finished syncing ${movies.length} movies to Trakt.`);
 }
 
 async function fetchAndParseAllWatchlistPages(url) {
